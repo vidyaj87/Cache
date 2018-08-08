@@ -1,0 +1,64 @@
+
+<project name="sample" default="Email report">
+	<property name="build.dir" value="build" />
+	<property name="src.dir" value="src" />
+	<property name="lib.dir" value="lib" />
+	<property name="reports.dir" value="report" />
+	<property name="TestReport.dir" value="TestReport" />
+	<property name="xml" value="Sample.xml" />
+
+    <path id="classpath">
+        <pathelement location="${build.dir}/classes"/>
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+	<!-- ====================== Defines the testng task========================== -->
+    <taskdef resource="testngtasks" classpathref="classpath"/>
+	<!-- =============Compile the test files =========== -->
+	<target name="compile" depends = "demo">
+	    <echo message="Compiling Tests...."/>
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}/classes" />
+		<echo message="Compiling tests" />
+		<javac srcdir="${src.dir}" destdir="${build.dir}/classes"
+			executable="javac" classpathref="classpath">
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="run" depends="compile">
+		               <echo message="Running Tests....." />
+		               <testng classpathref="classpath" outputDir="TestReport/${current.time}">
+		               <sysproperty key="tests" value="${tests}"/>
+		               <xmlfileset file="${tests}.xml"/>
+		               <sysproperty key="driver" value="${driver}"/>
+		               </testng>
+		       </target>
+	
+	<target name="demo">
+		<tstamp>
+			<format property="current.time" pattern="MMddyyyyhhmmssaa" />
+		</tstamp>
+		<mkdir dir="TestReport/${current.time}" />	
+		<mkdir dir="TestSummary" />
+	</target>
+
+	<target name="demo1" depends = "demo">
+	  <sleep seconds="5"/>
+	  <echo message="${current.time}" />
+	</target>
+	 
+	<target name="Email report" depends = "run">
+			<mail tolist="vidyaj@qburst.com" from="sampleqburst@gmail.com"
+				subject="Ffrees Test Execution Report - System Generated Mail" mailhost="smtp.gmail.com" mailport="465" ssl="true"
+				user="sampleqburst@gmail.com" password="qburst123" encoding="mime"
+				messagemimetype="text/html">
+				<attachments>
+					<fileset dir="TestReport/${current.time}">
+						<include name="**/emailable-report.html" />
+					</fileset>
+				</attachments>
+				<message>Test Results of Ffrees Website Automation - Please find the attachment.</message>
+				</mail>
+		</target> 
+
+	</project>
